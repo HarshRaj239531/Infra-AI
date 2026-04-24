@@ -5,11 +5,30 @@ const User = require('../models/User');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Helper: call Gemini
+// Models to try in order (fallback chain)
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'];
+
+// Helper: call Gemini with retry + model fallback
 const callGemini = async (prompt) => {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+  for (const modelName of GEMINI_MODELS) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+      } catch (err) {
+        const status = err.message?.includes('503') || err.message?.includes('429');
+        if (status && attempt === 1) {
+          // Wait 3s and retry same model once
+          await new Promise((r) => setTimeout(r, 3000));
+          continue;
+        }
+        // Move to next model
+        break;
+      }
+    }
+  }
+  throw new Error('All Gemini models are currently unavailable. Please try again in a minute.');
 };
 
 // @desc    Upload resume and start interview session

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Brain, LayoutDashboard, History, LogOut, Menu, X, Coins, ChevronDown } from 'lucide-react';
+import { Brain, LayoutDashboard, History, LogOut, Menu, X, Coins, ChevronDown, Sun, Moon } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -10,6 +10,20 @@ const Navbar = () => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isLight, setIsLight] = useState(() => {
+    return localStorage.getItem('ai_theme') === 'light';
+  });
+
+  useEffect(() => {
+    if (isLight) {
+      document.body.classList.add('light');
+    } else {
+      document.body.classList.remove('light');
+    }
+    localStorage.setItem('ai_theme', isLight ? 'light' : 'dark');
+  }, [isLight]);
+
+  const toggleTheme = () => setIsLight((prev) => !prev);
 
   const handleLogout = () => {
     logout();
@@ -89,6 +103,16 @@ const Navbar = () => {
               <Link to="/signup" className="btn btn-primary btn-sm">Get Started</Link>
             </div>
           )}
+
+          {/* Theme Toggle */}
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+            title={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+          >
+            {isLight ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
 
           {/* Mobile Toggle */}
           <button
