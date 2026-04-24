@@ -32,4 +32,11 @@ export const interviewAPI = {
   getReport: (id) => API.get(`/interview/${id}`),
 };
 
+// Payment APIs
+export const paymentAPI = {
+  getPackages: () => API.get('/payment/packages'),
+  createOrder: (packageId) => API.post('/payment/create-order', { packageId }),
+  verifyPayment: (data) => API.post('/payment/verify', data),
+};
+
 export default API;

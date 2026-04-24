@@ -13,6 +13,7 @@ import InterviewSetup from './pages/Interview/InterviewSetup';
 import InterviewRoom from './pages/Interview/InterviewRoom';
 import History from './pages/History/History';
 import Report from './pages/Report/Report';
+import Payment from './pages/Payment/Payment';
 
 function App() {
   return (
@@ -63,6 +64,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Report />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/buy-credits"
+            element={
+              <ProtectedRoute>
+                <Payment />
               </ProtectedRoute>
             }
           />

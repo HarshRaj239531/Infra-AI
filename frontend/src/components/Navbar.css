@@ -115,6 +115,28 @@ body.light .navbar {
   font-size: 0.8rem;
   font-weight: 600;
   color: #fbbf24;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.credits-badge:hover {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+.credits-badge.credits-empty {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  animation: pulse 2s infinite;
+}
+
+.credits-plus {
+  font-size: 0.7rem;
+  background: rgba(239, 68, 68, 0.2);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  margin-left: 2px;
 }
 
 /* User Dropdown */

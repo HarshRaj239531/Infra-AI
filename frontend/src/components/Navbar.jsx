@@ -68,11 +68,16 @@ const Navbar = () => {
         <div className="navbar-right">
           {user ? (
             <>
-              {/* Credits Badge */}
-              <div className="credits-badge">
+              {/* Credits Badge — click to buy */}
+              <Link
+                to="/buy-credits"
+                className={`credits-badge ${user.credits === 0 ? 'credits-empty' : ''}`}
+                title="Buy more credits"
+              >
                 <Coins size={14} />
                 <span>{user.credits} Credits</span>
-              </div>
+                {user.credits === 0 && <span className="credits-plus">+ Buy</span>}
+              </Link>
 
               {/* User Dropdown */}
               <div className="user-dropdown" onClick={() => setDropdownOpen(!dropdownOpen)}>

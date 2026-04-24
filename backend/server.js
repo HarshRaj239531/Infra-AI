@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 // Routes
 const authRoutes = require('./routes/authRoutes');
 const interviewRoutes = require('./routes/interviewRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 // Connect to MongoDB
 connectDB();
@@ -32,6 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/interview', interviewRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

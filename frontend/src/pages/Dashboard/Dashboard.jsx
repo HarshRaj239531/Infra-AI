@@ -148,7 +148,11 @@ const Dashboard = () => {
               <h3>Out of Credits</h3>
               <p>You've used all your free credits. Purchase more to continue practicing.</p>
             </div>
-            <button className="btn btn-primary">
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate('/buy-credits')}
+              id="buy-credits-btn"
+            >
               <Coins size={16} />
               Buy Credits
             </button>
