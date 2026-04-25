@@ -6,7 +6,7 @@ const User = require('../models/User');
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Models to try in order (fallback chain)
-const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'];
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest'];
 
 // Helper: call Gemini with retry + model fallback
 const callGemini = async (prompt) => {
@@ -17,8 +17,15 @@ const callGemini = async (prompt) => {
         const result = await model.generateContent(prompt);
         return result.response.text();
       } catch (err) {
-        const status = err.message?.includes('503') || err.message?.includes('429');
-        if (status && attempt === 1) {
+        console.error(`Gemini Error (${modelName}, attempt ${attempt}):`, err.message);
+        
+        if (err.message?.includes('403')) {
+          throw new Error('Gemini API key is invalid or has been revoked (possibly due to a leak). Please check your .env file.');
+        }
+
+        const isRetryable = err.message?.includes('503') || err.message?.includes('429');
+        if (isRetryable && attempt === 1) {
+          console.log(`Retrying ${modelName} in 3s...`);
           // Wait 3s and retry same model once
           await new Promise((r) => setTimeout(r, 3000));
           continue;
