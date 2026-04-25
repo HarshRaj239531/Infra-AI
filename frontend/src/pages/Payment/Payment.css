@@ -1,5 +1,86 @@
 /* Payment Page */
 
+/* ===== PROCESSING OVERLAY ===== */
+.processing-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.processing-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: 44px 48px;
+  text-align: center;
+  min-width: 340px;
+  box-shadow: var(--shadow-lg);
+}
+
+.processing-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.processing-card h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 28px;
+  color: var(--text-primary);
+}
+
+.processing-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+}
+
+.processing-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+
+.processing-step.step-active {
+  color: var(--primary-light);
+  font-weight: 600;
+}
+
+.processing-step.step-done {
+  color: #10b981;
+}
+
+.step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-light);
+  flex-shrink: 0;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.step-active .step-dot {
+  background: var(--primary);
+  animation: pulse 1s infinite;
+  transform: scale(1.2);
+}
+
+.step-done .step-dot {
+  background: #10b981;
+}
+
 .payment-header {
   text-align: center;
   margin-bottom: 48px;

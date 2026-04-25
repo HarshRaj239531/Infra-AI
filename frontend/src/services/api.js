@@ -37,6 +37,7 @@ export const paymentAPI = {
   getPackages: () => API.get('/payment/packages'),
   createOrder: (packageId) => API.post('/payment/create-order', { packageId }),
   verifyPayment: (data) => API.post('/payment/verify', data),
+  demoPurchase: (packageId) => API.post('/payment/demo-purchase', { packageId }),
 };
 
 export default API;

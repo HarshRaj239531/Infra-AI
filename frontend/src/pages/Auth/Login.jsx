@@ -68,7 +68,7 @@ const Login = () => {
                 <input
                   type="email"
                   name="email"
-                  className="form-input with-icon"
+                  className="form-input with-icon "
                   placeholder="john@example.com"
                   value={form.email}
                   onChange={handleChange}

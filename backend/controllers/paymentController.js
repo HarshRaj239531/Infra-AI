@@ -9,6 +9,7 @@ const CREDIT_PACKAGES = {
   pro: { credits: 30, amount: 17900, label: '30 Credits' },     // ₹179
 };
 
+// Razorpay instance
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -29,7 +30,7 @@ const createOrder = async (req, res) => {
     const options = {
       amount: pkg.amount, // amount in paise
       currency: 'INR',
-      receipt: `receipt_${req.user._id}_${Date.now()}`,
+      receipt: `rcpt_${req.user._id.toString().slice(-8)}_${Date.now().toString().slice(-6)}`,
       notes: {
         userId: req.user._id.toString(),
         packageId,
@@ -108,4 +109,35 @@ const getPackages = async (req, res) => {
   }
 };
 
-module.exports = { createOrder, verifyPayment, getPackages };
+// @desc    DEMO purchase — bypasses payment gateway (for testing/demo)
+// @route   POST /api/payment/demo-purchase
+// @access  Private
+const demoPurchase = async (req, res) => {
+  try {
+    const { packageId } = req.body;
+    const pkg = CREDIT_PACKAGES[packageId];
+    if (!pkg) {
+      return res.status(400).json({ message: 'Invalid package selected' });
+    }
+
+    // Simulate a small delay like a real payment
+    await new Promise((r) => setTimeout(r, 1500));
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { $inc: { credits: pkg.credits } },
+      { new: true }
+    );
+
+    res.json({
+      message: `Demo payment successful! ${pkg.credits} credits added.`,
+      credits: updatedUser.credits,
+      paymentId: `demo_${Date.now()}`,
+    });
+  } catch (error) {
+    console.error('Demo purchase error:', error);
+    res.status(500).json({ message: 'Demo purchase failed: ' + error.message });
+  }
+};
+
+module.exports = { createOrder, verifyPayment, getPackages, demoPurchase };

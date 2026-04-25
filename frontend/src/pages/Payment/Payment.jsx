@@ -42,12 +42,15 @@ const PACKAGE_META = {
   },
 };
 
+const STEPS = ['Initiating payment...', 'Processing transaction...', 'Adding credits to account...'];
+
 const Payment = () => {
   const { user, updateCredits } = useAuth();
   const navigate = useNavigate();
   const [packages, setPackages] = useState({});
   const [loading, setLoading] = useState(true);
-  const [paying, setPaying] = useState(null); // which package is being paid
+  const [paying, setPaying] = useState(null);
+  const [processingStep, setProcessingStep] = useState(0);
 
   useEffect(() => {
     paymentAPI
@@ -59,41 +62,43 @@ const Payment = () => {
 
   const handleBuy = async (packageId) => {
     setPaying(packageId);
+    setProcessingStep(1);
     try {
-      // 1. Load Razorpay script
+      // Step 1: Load Razorpay script
       const loaded = await loadRazorpay();
       if (!loaded) {
-        toast.error('Failed to load payment gateway. Please check your internet connection.');
+        toast.error('Failed to load Razorpay. Check internet connection.');
         return;
       }
 
-      // 2. Create order on backend
+      setProcessingStep(2);
+
+      // Step 2: Create order on backend
       const orderRes = await paymentAPI.createOrder(packageId);
       const { orderId, amount, currency, keyId, package: pkg, user: userInfo } = orderRes.data;
 
-      // 3. Open Razorpay checkout
+      // Step 3: Open Razorpay checkout popup
       const options = {
         key: keyId,
         amount,
         currency,
         name: 'AI-Interviewer',
-        description: `${pkg.label} - Interview Credits`,
+        description: `${pkg.label} — Interview Credits`,
         order_id: orderId,
         prefill: {
           name: userInfo.name,
           email: userInfo.email,
         },
-        theme: {
-          color: '#6366f1',
-        },
+        theme: { color: '#6366f1' },
         modal: {
           ondismiss: () => {
             toast.error('Payment cancelled');
             setPaying(null);
+            setProcessingStep(0);
           },
         },
         handler: async (response) => {
-          // 4. Verify payment on backend
+          setProcessingStep(3);
           try {
             const verifyRes = await paymentAPI.verifyPayment({
               razorpay_order_id: response.razorpay_order_id,
@@ -101,22 +106,29 @@ const Payment = () => {
               razorpay_signature: response.razorpay_signature,
               packageId,
             });
+            await new Promise((r) => setTimeout(r, 600));
             updateCredits(verifyRes.data.credits);
-            toast.success(verifyRes.data.message);
+            toast.success(`🎉 ${verifyRes.data.message}`);
             navigate('/dashboard');
           } catch (err) {
             toast.error(err.response?.data?.message || 'Payment verification failed');
           } finally {
             setPaying(null);
+            setProcessingStep(0);
           }
         },
       };
 
+      // Hide overlay while Razorpay popup is open
+      setPaying(null);
+      setProcessingStep(0);
       const rzp = new window.Razorpay(options);
       rzp.open();
+
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to initiate payment');
       setPaying(null);
+      setProcessingStep(0);
     }
   };
 
@@ -124,6 +136,34 @@ const Payment = () => {
 
   return (
     <div className="page">
+      {/* Processing Overlay */}
+      {paying && (
+        <div className="processing-overlay">
+          <div className="processing-card">
+            <div className="processing-icon">
+              {processingStep === 3
+                ? <CheckCircle size={44} color="#10b981" />
+                : <div className="spinner" />}
+            </div>
+            <h3>{processingStep === 3 ? 'Payment Successful!' : 'Processing Payment'}</h3>
+            <div className="processing-steps">
+              {STEPS.map((step, i) => (
+                <div
+                  key={i}
+                  className={`processing-step ${
+                    processingStep > i + 1 ? 'step-done' :
+                    processingStep === i + 1 ? 'step-active' : 'step-pending'
+                  }`}
+                >
+                  <div className="step-dot" />
+                  <span>{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="container page-content">
         {/* Header */}
         <div className="payment-header animate-fade-in">
@@ -248,8 +288,8 @@ const Payment = () => {
         {/* Test Mode Notice */}
         <div className="test-notice">
           <p>
-            🧪 <strong>Test Mode:</strong> Use Razorpay test card: <code>4111 1111 1111 1111</code>, 
-            any future expiry, CVV: <code>123</code>
+            🧪 <strong>Test Mode (rzp_test):</strong> Use card <code>4111 1111 1111 1111</code>,
+            any future expiry, CVV <code>123</code>, OTP <code>1234</code>
           </p>
         </div>
       </div>
